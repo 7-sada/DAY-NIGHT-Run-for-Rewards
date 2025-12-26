@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DAY & NIGHT Run for Rewards - นักวิ่งล่ารางวัล</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,6 +13,8 @@
         body {
             font-family: 'Kanit', sans-serif;
             background-color: #f0f9ff;
+            /* ป้องกันการเด้งของหน้าจอเวลาแตะบน iOS */
+            touch-action: manipulation;
         }
 
         .track-bg {
@@ -112,59 +114,79 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
+        /* ปรับปรุง Overlay ของกล้องให้เหมาะกับ Mobile */
         .camera-overlay {
-            opacity: 0;
             transition: opacity 0.2s;
         }
 
-        .runner-img-container:hover .camera-overlay {
-            opacity: 1;
+        /* บน Desktop ซ่อนไว้ก่อน (opacity 0) แล้วโชว์เมื่อ hover */
+        @media (hover: hover) {
+            .camera-overlay {
+                opacity: 0;
+            }
+
+            .runner-img-container:hover .camera-overlay {
+                opacity: 1;
+            }
+        }
+
+        /* บน Mobile ให้แสดงจางๆ ตลอดเวลา เพื่อให้รู้ว่ากดได้ */
+        @media (hover: none) {
+            .camera-overlay {
+                opacity: 0.6;
+            }
         }
     </style>
 </head>
 
-<body class="h-screen flex flex-col md:flex-row overflow-hidden">
+<!-- ใช้ h-[100dvh] เพื่อรองรับ Mobile Browser Bar -->
+
+<body class="h-[100dvh] flex flex-col md:flex-row overflow-hidden">
 
     <!-- Sidebar: Setup Panel -->
-    <div class="w-full md:w-1/4 bg-white shadow-xl z-20 flex flex-col p-6 border-r border-gray-200">
+    <!-- เพิ่ม overflow-y-auto เพื่อให้ Scroll ได้ถ้ารายละเอียดเยอะเกินหน้าจอมือถือ -->
+    <div
+        class="w-full md:w-1/4 bg-white shadow-xl z-20 flex flex-col p-4 md:p-6 border-b md:border-b-0 md:border-r border-gray-200 shrink-0 overflow-y-auto max-h-[45vh] md:max-h-full">
 
         <!-- Logo Section -->
-        <div class="flex flex-col items-center mb-6 text-center">
+        <div class="flex flex-col items-center mb-4 md:mb-6 text-center">
             <img src="/imgs/3b473a2e-87a4-43a0-b91e-1fd5c1b95b09.png" alt="Logo"
-                class="w-24 h-24 mb-3 rounded-full shadow-lg border-4 border-white bg-blue-50 object-cover transform hover:rotate-6 transition-transform duration-300">
+                class="w-16 h-16 md:w-24 md:h-24 mb-2 md:mb-3 rounded-full shadow-lg border-4 border-white bg-blue-50 object-cover transform hover:rotate-6 transition-transform duration-300">
 
-            <h1 class="text-2xl font-bold text-blue-600 tracking-tight">
-                DAY & NIGHT Run for Rewards
+            <h1 class="text-xl md:text-2xl font-bold text-blue-600 tracking-tight leading-tight">
+                DAY & NIGHT <br class="md:hidden">Run for Rewards
             </h1>
-            <p class="text-gray-500 text-sm">นักวิ่งล่ารางวัล</p>
+            <p class="text-gray-500 text-xs md:text-sm">นักวิ่งล่ารางวัล</p>
         </div>
 
-        <div class="flex-1 flex flex-col gap-4">
+        <div class="flex-1 flex flex-col gap-3 md:gap-4">
             <div>
-                <label class="block text-gray-700 font-medium mb-2">รายชื่อนักวิ่ง (คนละบรรทัด)</label>
+                <label class="block text-gray-700 font-medium mb-1 md:mb-2 text-sm md:text-base">รายชื่อนักวิ่ง
+                    (คนละบรรทัด)</label>
+                <!-- ปรับความสูง textarea ให้เหมาะสมกับมือถือ -->
                 <textarea id="nameInput"
-                    class="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none text-sm"
+                    class="w-full h-24 md:h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none text-sm"
                     placeholder="สมชาย&#10;สมหญิง&#10;John&#10;Alice"></textarea>
                 <div class="text-right text-xs text-gray-400 mt-1" id="countDisplay">0 คน</div>
             </div>
 
-            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+            <div class="bg-blue-50 p-3 md:p-4 rounded-lg border border-blue-100 hidden md:block">
                 <h3 class="font-semibold text-blue-800 mb-2 text-sm">กติกา & วิธีเปลี่ยนรูป</h3>
                 <ul class="text-xs text-blue-600 list-disc list-inside space-y-1">
                     <li>กด <b>"เตรียมพร้อม"</b> เพื่อสร้างลู่วิ่ง</li>
-                    <li><b>คลิกที่ตัวละคร</b> ในสนามเพื่อเปลี่ยนรูปภาพ</li>
+                    <li><b>แตะที่ตัวละคร</b> ในสนามเพื่อเปลี่ยนรูปภาพ</li>
                     <li>รูปภาพจะถูกจำไว้คู่กับชื่อ</li>
                 </ul>
             </div>
         </div>
 
-        <div class="mt-6 flex flex-col gap-3">
+        <div class="mt-4 md:mt-6 flex flex-row md:flex-col gap-2 md:gap-3">
             <button onclick="setupRace()"
-                class="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-3 rounded-lg transition shadow-sm">
-                เตรียมพร้อม (Reset)
+                class="flex-1 w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 md:py-3 rounded-lg transition shadow-sm text-sm md:text-base whitespace-nowrap">
+                รีเซ็ต
             </button>
             <button onclick="prepareRace()" id="startBtn"
-                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex-[2] w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2 md:py-3 rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base whitespace-nowrap"
                 disabled>
                 🔫 เริ่มการแข่งขัน!
             </button>
@@ -175,24 +197,25 @@
     <div class="flex-1 relative bg-gray-100 flex flex-col overflow-hidden">
         <!-- Stadium Header -->
         <div
-            class="bg-gray-800 text-white p-2 text-center text-xs tracking-wider shadow-md z-10 flex justify-between px-4 items-center">
-            <span>DAY AND NIGHT STADIUM 2025-28 ธันวาคม 2568</span>
+            class="bg-gray-800 text-white p-2 text-center text-xs tracking-wider shadow-md z-10 flex justify-between px-4 items-center shrink-0">
+            <span class="truncate mr-2">DAY AND NIGHT STADIUM 2025</span>
             <span id="statusBadge"
-                class="hidden bg-red-600 text-white text-[10px] px-2 py-0.5 rounded animate-pulse">SLOW MOTION</span>
+                class="hidden bg-red-600 text-white text-[10px] px-2 py-0.5 rounded animate-pulse whitespace-nowrap">SLOW
+                MOTION</span>
         </div>
 
         <!-- Tracks Container -->
         <div id="trackContainer" class="flex-1 overflow-y-auto overflow-x-hidden relative p-4 pb-20 scroll-smooth">
             <div class="flex h-full items-center justify-center text-gray-400">
-                <div class="text-center">
-                    <div class="text-6xl mb-4">🏟️</div>
-                    <p>กรอกชื่อผู้เข้าแข่งขันแล้วกด "เตรียมพร้อม"</p>
+                <div class="text-center p-4">
+                    <div class="text-4xl md:text-6xl mb-4">🏟️</div>
+                    <p class="text-sm md:text-base">กรอกชื่อแล้วกด "รีเซ็ต" เพื่อสร้างลู่วิ่ง</p>
                 </div>
             </div>
         </div>
 
         <!-- Finish Line Marker (Visual Overlay) -->
-        <div class="absolute top-0 bottom-0 right-8 w-4 finish-line opacity-50 pointer-events-none z-0 hidden"
+        <div class="absolute top-0 bottom-0 right-8 w-2 md:w-4 finish-line opacity-50 pointer-events-none z-0 hidden"
             id="finishLineParams"></div>
     </div>
 
@@ -200,15 +223,15 @@
     <div id="countdownOverlay"
         class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden backdrop-blur-sm">
         <div id="countdownText"
-            class="text-9xl font-black text-yellow-400 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] tracking-tighter animate-pop">
+            class="text-8xl md:text-9xl font-black text-yellow-400 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] tracking-tighter animate-pop">
             3
         </div>
     </div>
 
     <!-- Winner Modal -->
     <div id="winnerModal"
-        class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden backdrop-blur-sm">
-        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-90 opacity-0 transition-all duration-300 flex flex-col items-center"
+        class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl p-6 md:p-8 max-w-sm w-full text-center shadow-2xl transform scale-90 opacity-0 transition-all duration-300 flex flex-col items-center"
             id="winnerCard">
             <!-- Winner Image Display -->
             <div id="winnerImageContainer" class="mb-4 hidden">
@@ -217,21 +240,21 @@
             </div>
             <div id="winnerEmoji" class="text-6xl mb-4 animate-bounce">🏆</div>
 
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">ผู้ชนะคือ!</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">ผู้ชนะคือ!</h2>
             <div id="winnerName"
-                class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-red-500 py-2">
+                class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-red-500 py-2 break-words w-full">
                 -
             </div>
             <p class="text-gray-500 mt-2 text-sm">ยินดีด้วยครับ!</p>
 
             <div class="mt-6 flex flex-col gap-3 w-full">
                 <button onclick="removeWinner()"
-                    class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 px-4 rounded-xl transition border border-red-200 flex items-center justify-center gap-2">
+                    class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-bold py-3 px-4 rounded-xl transition border border-red-200 flex items-center justify-center gap-2 text-sm md:text-base">
                     <span>❌</span> ลบชื่อผู้ชนะออก
                 </button>
                 <button onclick="closeModal()"
-                    class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2">
-                    <span>🔄</span> เล่นรอบต่อไป (เก็บชื่อไว้)
+                    class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2 text-sm md:text-base">
+                    <span>🔄</span> เล่นรอบต่อไป
                 </button>
             </div>
         </div>
@@ -325,32 +348,40 @@
 
                 // Create Lane HTML
                 const lane = document.createElement('div');
-                lane.className = "relative h-20 border-b border-gray-300 flex items-center w-full bg-white bg-opacity-80 mb-1 rounded-l-md shadow-sm";
+                lane.className = "relative h-16 md:h-20 border-b border-gray-300 flex items-center w-full bg-white bg-opacity-80 mb-1 rounded-l-md shadow-sm";
 
                 // Track Number
                 const number = document.createElement('div');
-                number.className = "w-8 text-center text-xs font-bold text-gray-400 flex-shrink-0";
+                number.className = "w-6 md:w-8 text-center text-[10px] md:text-xs font-bold text-gray-400 flex-shrink-0";
                 number.innerText = index + 1;
 
                 // Runner Element Container
                 const runnerEl = document.createElement('div');
                 runnerEl.className = "absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col items-center transition-all z-10";
-                runnerEl.style.left = '50px';
+                runnerEl.style.left = '40px'; // Start slightly left on mobile
 
                 // Avatar Visuals
                 const avatarContainer = document.createElement('div');
                 avatarContainer.className = "runner-img-container cursor-pointer group";
+                // Adjust size for mobile
+                avatarContainer.style.width = "48px";
+                avatarContainer.style.height = "48px";
+                if (window.innerWidth >= 768) {
+                    avatarContainer.style.width = "64px";
+                    avatarContainer.style.height = "64px";
+                }
+
                 avatarContainer.onclick = () => triggerUpload(index);
 
                 // Overlay for hover
                 const overlay = document.createElement('div');
-                overlay.className = "camera-overlay absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center text-white text-xl font-bold z-20 pointer-events-none";
+                overlay.className = "camera-overlay absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center text-white text-lg md:text-xl font-bold z-20 pointer-events-none";
                 overlay.innerHTML = "📷";
 
                 // Content (Image or Emoji)
                 const content = document.createElement('div');
                 content.id = `runner-visual-${index}`;
-                content.className = "w-full h-full flex items-center justify-center text-4xl filter drop-shadow-md";
+                content.className = "w-full h-full flex items-center justify-center text-3xl md:text-4xl filter drop-shadow-md";
 
                 if (savedImage) {
                     content.innerHTML = `<img src="${savedImage}" class="runner-custom-img">`;
@@ -363,7 +394,7 @@
 
                 // Name Tag
                 const nameTag = document.createElement('div');
-                nameTag.className = "text-[10px] font-bold bg-gray-800 text-white px-2 rounded-full whitespace-nowrap z-10 -mt-2 shadow border border-white";
+                nameTag.className = "text-[9px] md:text-[10px] font-bold bg-gray-800 text-white px-1.5 md:px-2 rounded-full whitespace-nowrap z-10 -mt-2 shadow border border-white max-w-[80px] md:max-w-none truncate";
                 nameTag.innerText = name;
 
                 runnerEl.appendChild(avatarContainer);
@@ -371,7 +402,7 @@
 
                 // Finish Line Flag inside lane
                 const finishFlag = document.createElement('div');
-                finishFlag.className = "absolute right-8 top-0 bottom-0 w-1 bg-red-200 opacity-50";
+                finishFlag.className = "absolute right-4 md:right-8 top-0 bottom-0 w-1 bg-red-200 opacity-50";
 
                 lane.appendChild(number);
                 lane.appendChild(finishFlag);
@@ -449,8 +480,8 @@
             startBtn.innerText = "กำลังแข่งขัน...";
 
             const containerWidth = trackContainer.clientWidth;
-            const finishLineOffset = 40;
-            const startOffset = 50;
+            const finishLineOffset = window.innerWidth < 768 ? 20 : 40; // Less padding on mobile
+            const startOffset = window.innerWidth < 768 ? 40 : 50;
 
             runners.forEach(r => {
                 r.laneWidth = containerWidth - startOffset - finishLineOffset;
@@ -507,7 +538,7 @@
                 const movement = runner.speed * (deltaTime / 16) * timeScale;
                 runner.position += movement;
 
-                const pixelPos = 50 + (runner.position / 100 * runner.laneWidth);
+                const pixelPos = (window.innerWidth < 768 ? 40 : 50) + (runner.position / 100 * runner.laneWidth);
                 runner.element.style.left = `${pixelPos}px`;
 
                 const scale = 1 + (runner.speed / 4);
@@ -516,7 +547,7 @@
 
                 if (runner.position >= 100) {
                     runner.finished = true;
-                    runner.element.style.left = `${50 + runner.laneWidth}px`;
+                    runner.element.style.left = `${(window.innerWidth < 768 ? 40 : 50) + runner.laneWidth}px`;
                     if (!someoneFinished) {
                         someoneFinished = true;
                         winner = runner;
@@ -660,6 +691,12 @@
 
         nameInput.value = "พี่เหมียว\nพี่แมว\nพี่เอ็ม\nพี่เอ็ม\nพี่อ้น\nพี่โอเล่";
         nameInput.dispatchEvent(new Event('input'));
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            // Optional: Re-calculate sizes if needed dynamically, 
+            // but current logic calculates on Start which is sufficient.
+        });
     </script>
 </body>
 
